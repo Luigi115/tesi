@@ -1,0 +1,83 @@
+import numpy as np
+from numpy import dot
+from numpy.linalg import norm
+from sklearn.feature_extraction.text import CountVectorizer
+
+# Funzione per calcolare la similarità del coseno
+def cos_sim(a, b):
+    return dot(a, b) / (norm(a) * norm(b))
+
+# Crea il tuo corpus di testo, questo è un esempio
+corpus = ["the dog barks", "the cat meows", "the dog and cat play"]
+
+# Crea il modello CountVectorizer
+vectorizer = CountVectorizer()
+X = vectorizer.fit_transform(corpus)
+vocab = np.array(vectorizer.get_feature_names_out())
+
+# Verifica se "dog" e "cat" sono nel vocabolario
+dog_index = np.where(vocab == 'dog')[0]
+cat_index = np.where(vocab == 'cat')[0]
+
+# Verifica che gli indici esistano
+if dog_index.size > 0:
+    dog = np.array(X[:, dog_index[0]].todense()).flatten()  # Usare : per indicizzare la colonna
+else:
+    print("La parola 'dog' non è nel vocabolario.")
+
+if cat_index.size > 0:
+    cat = np.array(X[:, cat_index[0]].todense()).flatten()  # Usare : per indicizzare la colonna
+else:
+    print("La parola 'cat' non è nel vocabolario.")
+
+# Se entrambe le parole sono nel vocabolario, calcola la similarità
+if dog_index.size > 0 and cat_index.size > 0:
+    # Stampa le dimensioni dei vettori
+    print(f"Dimensione del vettore per 'dog': {dog.shape}")
+    print(f"Dimensione del vettore per 'cat': {cat.shape}")
+    
+    # Calcola la similarità del coseno
+    similarity = cos_sim(dog, cat)
+    print("Cosine similarity between 'dog' and 'cat':", similarity)
+
+
+
+#Questi sono i codici riutilizzabili
+# Funzione per calcolare la similarità del coseno
+def cos_sim(a, b):
+    return dot(a, b) / (norm(a) * norm(b))
+
+# Funzione per ottenere tutti i vettori delle parole nel vocabolario
+def get_all_word_vectors(corpus):
+    vectorizer = CountVectorizer()
+    X = vectorizer.fit_transform(corpus)
+    vocab = np.array(vectorizer.get_feature_names_out())
+    
+    word_vectors = {}
+    for word, index in zip(vocab, range(len(vocab))):
+        word_vectors[word] = np.array(X[:, index].todense()).flatten()
+    
+    return word_vectors
+
+# Funzione per calcolare la similarità del coseno tra coppie di parole
+def calculate_similarity_for_pairs(corpus, test_pairs):
+    # Crea il modello CountVectorizer
+    vectorizer = CountVectorizer()
+    X = vectorizer.fit_transform(corpus)
+    vocab = np.array(vectorizer.get_feature_names_out())
+    
+    similarities = {}
+    
+    for (w1, w2) in test_pairs:
+        if w1 in vocab and w2 in vocab:
+            i = np.where(vocab == w1)[0][0]
+            j = np.where(vocab == w2)[0][0]
+
+            v1 = np.array(X[:, i].todense()).flatten()
+            v2 = np.array(X[:, j].todense()).flatten()
+
+            similarities[(w1, w2)] = cos_sim(v1, v2)
+        else:
+            similarities[(w1, w2)] = None  # Indica che una delle parole non è nel vocabolario
+
+    return similarities

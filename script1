@@ -1,0 +1,45 @@
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import os, string
+
+
+
+from nltk.corpus import stopwords
+from tqdm import tqdm
+from datasets import load_dataset
+
+
+
+def concatenate_info(row):
+    text = row['Title']
+    text += f" directed by {row['Director']}," if row['Director'] != 'Unknown' else ''
+    text += f" starred by {row['Cast']}" if row['Cast'] is not None else ''
+    text += f": {row['Plot']}"
+    return text
+
+
+ds = load_dataset("vishnupriyavr/wiki-movie-plots-with-summaries")
+ds
+df_train = pd.DataFrame(ds['train'])
+df_train = df_train[['Title', 'Director', 'Cast', 'Plot']]
+df_train
+texts = []
+
+for i, row in tqdm(df_train.iterrows()):
+    text = concatenate_info(row)
+    texts.append(text)
+
+df_train['text'] = texts
+df_train['text'] = df_train['text'].apply(str.lower)
+
+df_train
+
+for i in range(10):
+    print(i, "film")
+    print(df_train.iloc[i])
+    print("\n")
+
+nltk.download('stopwords')
+print(stopwords.words('english'))

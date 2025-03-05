@@ -1,0 +1,35 @@
+# 1 Definisce e stampa le stopword 
+import nltk
+import string
+from nltk.corpus import stopwords
+
+# Scarica le stopwords se non sono già presenti
+nltk.download('stopwords')
+
+# Definisci stop_words (stopwords in inglese + punteggiatura)
+stop_words = stopwords.words('english') + list(string.punctuation)
+
+
+#2 Rimuove le stopword da un testo
+def stopwordRemove(text):
+    words = text.split()  # Divide il testo in parole
+    filtered_words = [word for word in words if word.lower() not in stop_words]
+    return " ".join(filtered_words)
+
+# Esempio di testo
+testo = "This is an example sentence, with some stopwords!"
+print(testo)
+clean_text = stopwordRemove(testo)
+print(clean_text)  # Output: "example sentence"
+
+
+#Codice riutilizzabile
+#trova tutte le stopword
+def get_stopwords():
+    nltk.download('stopwords')  # Scarica le stopwords se non sono già presenti
+    return stopwords.words('english') + list(string.punctuation)
+
+# Funzione per rimuovere le stopword da un testo
+def remove_stopwords(text):
+    stop_words = get_stopwords()  # Ottieni la lista delle stopword
+    return " ".join([word for word in text.split() if word.lower() not in stop_words])

@@ -1,0 +1,84 @@
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import os, string
+from tqdm import tqdm
+from datasets import load_dataset
+from sklearn.feature_extraction.text import CountVectorizer
+import nltk
+from nltk.corpus import stopwords
+
+# Scarica le stopwords se non sono già presenti
+nltk.download('stopwords')
+
+# Definisci le stopwords (va fatto PRIMA di usare CountVectorizer)
+stop_words = stopwords.words('english') + list(string.punctuation)
+
+# Carica il dataset
+ds = load_dataset("vishnupriyavr/wiki-movie-plots-with-summaries")
+df_train = pd.DataFrame(ds['train'])
+
+# Seleziona solo le colonne rilevanti
+df_train = df_train[['Title', 'Director', 'Cast', 'Plot']]
+
+# Funzione per concatenare le informazioni in un unico testo
+def concatenate_info(row):
+    text = row['Title']
+    text += f" directed by {row['Director']}," if row['Director'] != 'Unknown' else ''
+    text += f" starred by {row['Cast']}" if row['Cast'] is not None else ''
+    text += f": {row['Plot']}"
+    return text
+
+# Prepara i testi
+df_train['text'] = df_train.apply(concatenate_info, axis=1)
+df_train['text'] = df_train['text'].apply(str.lower)
+
+# Crea il modello CountVectorizer
+corpus = df_train['text']
+count_model = CountVectorizer(ngram_range=(1,1), stop_words=stop_words)  # Usa unigrammi e rimuove le stopwords
+count_model.fit(corpus)
+
+# Trasforma il corpus in una matrice sparsa
+encoded_corpus = count_model.transform(corpus)
+
+# Mostra la forma della matrice risultante
+print(encoded_corpus.shape)
+
+
+
+#funzioni da riutilizzare 
+# Funzione per caricare il dataset
+def load_movie_plots():
+    """Carica il dataset delle trame dei film."""
+    ds = load_dataset("vishnupriyavr/wiki-movie-plots-with-summaries")
+    df_train = pd.DataFrame(ds['train'])
+    return df_train[['Title', 'Director', 'Cast', 'Plot']]
+
+# Funzione per concatenare informazioni in un unico testo
+def concatenate_info(row):
+    """Concatena titolo, regista, cast e trama in un unico testo."""
+    text = row['Title']
+    text += f" directed by {row['Director']}," if row['Director'] != 'Unknown' else ''
+    text += f" starred by {row['Cast']}" if row['Cast'] is not None else ''
+    text += f": {row['Plot']}"
+    return text
+
+# Funzione per preparare il testo
+def prepare_text(df):
+    """Prepara il testo concatenando le informazioni e convertendo in minuscolo."""
+    df['text'] = df.apply(concatenate_info, axis=1)
+    df['text'] = df['text'].apply(str.lower)
+    return df['text']
+
+# Funzione per creare e addestrare il modello CountVectorizer
+def create_count_vectorizer(corpus, stop_words=None):
+    """Crea e addestra un modello CountVectorizer sul corpus."""
+    count_model = CountVectorizer(ngram_range=(1, 1), stop_words=stop_words)
+    count_model.fit(corpus)
+    return count_model
+
+# Funzione per trasformare il corpus in una matrice sparsa
+def transform_to_sparse_matrix(count_model, corpus):
+    """Trasforma il corpus in una matrice sparsa."""
+    return count_model.transform(corpus)
