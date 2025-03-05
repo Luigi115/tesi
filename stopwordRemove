@@ -7,7 +7,7 @@ from nltk.corpus import stopwords
 nltk.download('stopwords')
 
 # Definisci stop_words (stopwords in inglese + punteggiatura)
-stop_words = stopwords.words('english') + list(string.punctuation) + "sve"
+stop_words = stopwords.words('english') + list(string.punctuation)
 
 
 #2 Rimuove le stopword da un testo
